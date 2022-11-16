@@ -6,7 +6,7 @@ from django.db import models as basemodels
 # Create your models here.
 from pynamodb import models
 from pynamodb.attributes import UnicodeAttribute, MapAttribute, ListAttribute, JSONAttribute
-from ..env import DB_HOST, DB_REGION
+from ...junkie_django_api.env import DB_HOST, DB_REGION
 '''
 id : unique identifier
 category : eg. app, illustation, design etc

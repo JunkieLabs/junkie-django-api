@@ -1,5 +1,5 @@
 import os
-import sys
+# import sys
 import environ
 from pathlib import Path
 from corsheaders.defaults import default_methods

@@ -8,7 +8,7 @@ from pynamodb import models
 from pynamodb.attributes import UnicodeAttribute, JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection, IncludeProjection
 
-from ..env import DB_HOST
+from ...junkie_django_api.env import DB_HOST
 
 '''
 id : unique identifier

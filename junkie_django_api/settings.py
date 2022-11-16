@@ -22,6 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-fo#9mqmjvvam)$u0fgs@171wi@j5m1o=wn$!k!uu!1x5@moc3c'
 
+NANO_ID = '0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -41,7 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'apps.products',
     'apps.productionLine',
-    'apps.contactUs',
+    'apps.contact',
 ]
 
 MIDDLEWARE = [
