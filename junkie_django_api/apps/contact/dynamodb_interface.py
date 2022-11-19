@@ -1,9 +1,9 @@
 import datetime
 from dateutil import parser
 import json
-from apps.contact.models import ContactUs
 from pynamodb.expressions.operand import Path
 
+from ..contact.models import ContactUs
 
 
 class DynamodbContactUs:

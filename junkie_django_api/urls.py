@@ -18,7 +18,7 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/products/', include('app.products.urls')),
-    path('api/production-lines/', include('app.productionLine.urls')),
-    path('api/contact-us/', include('app.contactUs.urls')),
+    path('api/products/', include('junkie_django_api.apps.product.urls')),
+    path('api/production-lines/', include('junkie_django_api.apps.productionLine.urls')),
+    path('api/contact-us/', include('junkie_django_api.apps.contact.urls')),
 ]

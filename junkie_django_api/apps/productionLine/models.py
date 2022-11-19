@@ -8,7 +8,7 @@ from pynamodb import models
 from pynamodb.attributes import UnicodeAttribute, JSONAttribute, ListAttribute, NumberAttribute, UnicodeAttribute
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection, IncludeProjection
 
-from ...junkie_django_api.env import DB_HOST
+from junkie_django_api.env import DB_HOST, DB_REGION
 
 '''
 id : unique identifier
@@ -39,7 +39,7 @@ class ProductionLine(models.Model):
     class Meta:
         table_name = "productionLine-table"
         host = DB_HOST
-        region = "ap-south-1"
+        region = DB_REGION
         read_capacity_units=5
         write_capacity_units=5
     

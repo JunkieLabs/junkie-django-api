@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 
 from django.http import HttpRequest
-from apps.contact.dynamodb_interface import DynamodbContactUs
+from ..contact.dynamodb_interface import DynamodbContactUs
 
 
 

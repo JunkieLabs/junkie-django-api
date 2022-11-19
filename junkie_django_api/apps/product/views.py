@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 
-from apps.products.dynamodb_interface import DynamodbProducts
+from ..product.dynamodb_interface import DynamodbProducts
 
 # logger
 import logging
@@ -37,7 +37,7 @@ class ProductsView(APIView):
             context = {"isSuccessfull" : "true", "keys" : keys, "id":keys["id"]}
             return Response(status=status.HTTP_201_CREATED, data=context)
         except Exception as e:
-            print("err :", e,':::::::::::::::::::::::')
+            # print("err :", e,':::::::::::::::::::::::')
             return Response({'error': 'Failed to insert'}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -56,7 +56,7 @@ class ProductsView(APIView):
             category : str = request.query_params.get('category')
 
         lastKey : str = request.query_params.get('lastKey')
-        print(category)
+        # print(category)
 
         if lastKey:
             lastKey = lastKey.replace("\'", "\"")
@@ -124,7 +124,7 @@ class ProductDetailView(APIView):
             context = {'item' : data}
             return Response(status=status.HTTP_200_OK, data=context)
         except Exception as e:
-            # print("err :", e)
+            print("err :", e)
             return Response({'error': "item doesn't exist"}, status= status.HTTP_204_NO_CONTENT)
 
 # PUT    
@@ -154,5 +154,5 @@ class ProductDetailView(APIView):
             return Response({'isSuccessful' : 'true'}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
             print("err :", e)
-            return Response({'isSuccessful' : 'false'}, status= status.HTTP_400_BAD_REQUEST)
+            return Response({'isSuccessful' : 'false', "msg" : e.args}, status= status.HTTP_400_BAD_REQUEST)
 

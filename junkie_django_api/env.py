@@ -2,7 +2,7 @@ import os
 # import sys
 import environ
 from pathlib import Path
-from corsheaders.defaults import default_methods
+# from corsheaders.defaults import default_methods
 from corsheaders.defaults import default_headers
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -11,32 +11,17 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-env = environ.Env()
+
 ENVIRONMENT = os.environ.get('ENV')
-print("ENVIRONMENT :", ENVIRONMENT)
-if ENVIRONMENT == 'local':
-    env.read_env(str(BASE_DIR / '.env.local'))
-    print("Inside local env")
-    STATIC1_URL = 'static/' # if not local
-    CORS_ALLOW_METHODS = list(default_methods)
-    CORS_ALLOW_HEADERS = list(default_headers) + [
-        "range",
-    ]
-    CORS_EXPOSE_HEADERS = ["Content-Range"]
 
-elif ENVIRONMENT == 'dev':
-    print("Inside dev env")
-    env.read_env(str(BASE_DIR / '.env.dev'))
-    STATIC1_URL = '../static/' # if not local
-
-elif ENVIRONMENT == 'prod':
-    print("Inside prod env")
-    env.read_env(str(BASE_DIR / '.env.production'))
-    STATIC1_URL = '../static/' # if not local
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, f'.env.{ENVIRONMENT}'))
 
 
 DB_HOST = env.str('DB_HOST')
+# print("DB_HOST :", DB_HOST)
 DB_REGION = env.str('DB_REGION')
+# print("DB_REGION :", DB_REGION)
 SECRET_KEY = env.str('SECRET_KEY')
 DEBUG = env.str('DEBUG', default=False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')

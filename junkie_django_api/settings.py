@@ -10,17 +10,18 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-from pathlib import Path
+# from pathlib import Path
+from .env import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fo#9mqmjvvam)$u0fgs@171wi@j5m1o=wn$!k!uu!1x5@moc3c'
+# SECRET_KEY = 
 
 NANO_ID = '0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
 
@@ -41,9 +42,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'apps.products',
-    'apps.productionLine',
-    'apps.contact',
+    'junkie_django_api.apps.product',
+    'junkie_django_api.apps.productionLine',
+    'junkie_django_api.apps.contact',
+    # 'junkie_django_api.management',
+    
 ]
 
 MIDDLEWARE = [

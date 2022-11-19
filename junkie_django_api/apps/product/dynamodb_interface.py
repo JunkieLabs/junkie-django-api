@@ -2,7 +2,7 @@ import json
 
 from nanoid import generate
 from junkie_django_api.settings import NANO_ID as _A
-from apps.products.models import Products
+from ..product.models import Products
 from pynamodb.expressions.operand import Path
 
 #_A = '0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'

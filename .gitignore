@@ -8,7 +8,7 @@ __pycache__/
 # dependencies
 /.env
 
-
+/dynamodb_local_latest
 
 # testing
 /coverage
@@ -32,3 +32,4 @@ mysite_prod.log*
 zappa_settings.json
 readme.txt
 *.db
+db.sqlite3

@@ -1,4 +1,4 @@
-from apps.productionLine.actions.models import ProductionLineAction
+from ...productionLine.actions.models import ProductionLineAction
 
 
 

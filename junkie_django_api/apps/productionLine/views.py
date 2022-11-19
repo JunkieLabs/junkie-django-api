@@ -6,8 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 # import urllib
-from apps.productionLine.dynamodb_interface import DynamodbProductionLine
-from apps.products.dynamodb_interface import DynamodbProducts
+from ..productionLine.dynamodb_interface import DynamodbProductionLine
+from ..product.dynamodb_interface import DynamodbProducts
 
 # Create your views here.
 #_stages = ('proposed', 'ongoing', 'completed')

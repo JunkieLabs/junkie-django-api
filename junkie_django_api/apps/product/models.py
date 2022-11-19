@@ -1,12 +1,10 @@
-from django.db import models
+# from django.db import models
 
-# Create your models here.
-from django.db import models as basemodels
 
 # Create your models here.
 from pynamodb import models
-from pynamodb.attributes import UnicodeAttribute, MapAttribute, ListAttribute, JSONAttribute
-from ...junkie_django_api.env import DB_HOST, DB_REGION
+from pynamodb.attributes import UnicodeAttribute, ListAttribute, JSONAttribute
+from junkie_django_api.env import DB_HOST, DB_REGION
 '''
 id : unique identifier
 category : eg. app, illustation, design etc

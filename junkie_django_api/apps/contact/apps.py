@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class ProductsConfig(AppConfig):
+class ContactusConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.products'
+    name = 'junkie_django_api.apps.contact'

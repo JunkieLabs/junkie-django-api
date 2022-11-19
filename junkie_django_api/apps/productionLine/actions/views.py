@@ -6,8 +6,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.productionLine.actions.dynamodb_interface import DynamodbProductionLineAction
-from apps.productionLine.dynamodb_interface import DynamodbProductionLine
+from ...productionLine.actions.dynamodb_interface import DynamodbProductionLineAction
+from ...productionLine.dynamodb_interface import DynamodbProductionLine
 
 from .models import ProductionLineAction
 

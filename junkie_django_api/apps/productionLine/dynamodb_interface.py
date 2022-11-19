@@ -4,7 +4,7 @@ import json
 from junkie_django_api.settings import NANO_ID as _A
 
 from nanoid import generate
-from apps.productionLine.models import ProductionLine
+from ..productionLine.models import ProductionLine
 from pynamodb.expressions.operand import Path
 
 
