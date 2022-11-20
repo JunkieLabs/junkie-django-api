@@ -198,7 +198,7 @@ For any questions or suggestions send a mail to junkielabs.dev@gmail.com or chat
 
 <br>
 
-<!-- [![Gitter](https://badges.gitter.im/nubar-api/django-dynamodb-lambda-function.svg)](https://gitter.im/nubar-api/django-dynamodb-lambda-function?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) -->
+<!-- [![Gitter](https://badges.gitter.im/nubar-api/django-dynamodb-lambda-function.svg)](https://gitter.im/nubar-api/django-dynamodb-lambda-function?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![Join the chat at https://gitter.im/nubar-api/Junkie-Django-Api](https://badges.gitter.im/nubar-api/Junkie-Django-Api.svg)](https://gitter.im/nubar-api/Junkie-Django-Api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) -->
 
 <br>
 
