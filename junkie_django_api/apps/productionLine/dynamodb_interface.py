@@ -1,5 +1,7 @@
-from datetime import datetime
 import json
+import logging
+
+# from datetime import datetime
 
 from junkie_django_api.settings import NANO_ID as _A
 
@@ -8,32 +10,34 @@ from ..productionLine.models import ProductionLine
 from pynamodb.expressions.operand import Path
 
 
+logger = logging.getLogger(__name__)
+
+
 class DynamodbProductionLine:
     if not ProductionLine.exists():
         ProductionLine.create_table(wait=True)
-        print("created the productionLine-table")
+        logger.info("created the productionLine-table")
 
     def create(self, data : dict):
         product = ProductionLine()
         category = data['category']
-        print(data)
+        logger.debug(data)
         id = f"{category}_{generate(_A, 13)}"
-        print("adg")
+        logger.debug("adg")
         while self.checkIdExists(id=id):
             id = f"{category}_{generate(_A, 13)}"
-        print("asgda")
 
-        print(data.keys())
+        # logger.debug(data.keys())
         
         try:
             product.from_json(json.dumps(data))
         except Exception as e:
-            print("erroe :", e)
+            logger.exception(e)
+            raise e
 
-        print("product :", product.attribute_values)
+        # logger.debug("product :", product.attribute_values)
         product.id = id
         product.save()
-        print("ho gaya")
         return {"id" : id}
 
     def delete(self, id : str):
@@ -56,10 +60,10 @@ class DynamodbProductionLine:
         return productList
 
     def getPaginationByScan(self, limit : int, lastKey : dict):
-        # print("dffaf")
+        # logger.info("dffaf")
         productList = ProductionLine.scan(filter_condition=None, limit=int(limit), last_evaluated_key=lastKey)#filter_condition= Products.status == 'unrestricted'
-        # print("size",productList.__sizeof__())
-        # print("jsadhadhas")
+        # logger.info("size",productList.__sizeof__())
+        # logger.info("jsadhadhas")
         return productList    
 
     def updateSelfAttributes(self, entity : ProductionLine, data : dict):
@@ -75,6 +79,6 @@ class DynamodbProductionLine:
         try:
             return ProductionLine.get(hash_key=id).exists()
         except Exception as e:
-            print(e)
+            logger.error(e)
             return False
 

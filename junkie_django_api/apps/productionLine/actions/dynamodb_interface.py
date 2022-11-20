@@ -1,11 +1,13 @@
+import logging
 from ...productionLine.actions.models import ProductionLineAction
 
+logger = logging.getLogger(__name__)
 
 
 class DynamodbProductionLineAction:
     if not ProductionLineAction.exists():
         ProductionLineAction.create_table(wait=True)
-        print("created the productionLineAction-table")
+        logger.info("created the productionLineAction-table")
 
     def add(self, entity : ProductionLineAction):
         entity.save()

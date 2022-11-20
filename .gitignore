@@ -33,3 +33,4 @@ zappa_settings.json
 readme.txt
 *.db
 db.sqlite3
+# README.md

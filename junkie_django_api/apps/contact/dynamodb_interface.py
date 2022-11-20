@@ -1,15 +1,19 @@
 import datetime
 from dateutil import parser
 import json
+import logging
 from pynamodb.expressions.operand import Path
 
 from ..contact.models import ContactUs
 
 
+logger = logging.getLogger(__name__)
+
+
 class DynamodbContactUs:
     if not ContactUs.exists():
         ContactUs.create_table(wait=True)
-        print("created the contactUs-table")
+        logger.info("created the contactUs-table")
 
     def create(self, data : dict):
         contact = ContactUs()
@@ -20,7 +24,7 @@ class DynamodbContactUs:
         contact.id = id
         contact.save()
         keys = {"id" : id}
-        # print("contactss :", ContactUs.get)
+        # logger.info("contactss :", ContactUs.get)
         return keys
     pass
 
@@ -29,7 +33,7 @@ class DynamodbContactUs:
             contactList = ContactUs.scan(filter_condition=None, limit=int(limit), last_evaluated_key=lastKey)
             return contactList
         except Exception as e:
-            print("err :", e )
+            logger.error( e )
             contactList = ContactUs.scan(filter_condition=None, limit=int(limit))
             return contactList
         
@@ -38,9 +42,9 @@ class DynamodbContactUs:
         x = id.split("+")
         userEmail = x[0]
         timeStamp = x[1]
-        # print(timestamp)
+        # logger.info(timestamp)
         # timeStamp = parser.parse(timestamp)
-        # print(timeStamp)
+        # logger.info(timeStamp)
         entity = ContactUs.get(hash_key=userEmail, range_key=timeStamp)
         return entity
 

@@ -1,3 +1,4 @@
+import logging
 import requests
 import json
 
@@ -9,11 +10,13 @@ from rest_framework.views import APIView
 from django.http import HttpRequest
 from ..contact.dynamodb_interface import DynamodbContactUs
 
+logger = logging.getLogger(__name__)
 
 
 class ContactsView(APIView):
+    dynamodbContactUs = DynamodbContactUs()
+
     def post(self, request):
-        dynamodbContactUs = DynamodbContactUs()
         try:
             x : HttpRequest = request
             data = request.data
@@ -23,19 +26,18 @@ class ContactsView(APIView):
             data["locality"] = location_data['city']
             data["state"] = location_data['region_name']
             data["country"] = location_data['country_name']
-            keys = dynamodbContactUs.create(data=data)
+            keys = self.dynamodbContactUs.create(data=data)
             return Response({"isSuccessful" : "true", "id" : keys["id"]}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            print("err :", e)
+            logger.error(e)
             return Response({'error': 'Failed to insert'}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get(self, request):
-        dynamodbContactUs = DynamodbContactUs()
         lastKey = request.query_params.get('lastKey')
         totalItemCount = request.query_params.get('totalItemCount', 0)
         limit = request.query_params.get('limit', 20)
 
-        contacts = dynamodbContactUs.getPaginationByScan(limit=limit, lastKey=lastKey)
+        contacts = self.dynamodbContactUs.getPaginationByScan(limit=limit, lastKey=lastKey)
         l = []
         for item in contacts:
             l.append(json.loads(item.to_json()))
@@ -50,33 +52,32 @@ class ContactsView(APIView):
 
 
 class ContactDetailView(APIView):
+    dynamodbContactUs = DynamodbContactUs()
+
     def get(self, request : HttpRequest, id : str):
-        dynamodbContactUs = DynamodbContactUs()
         try:
-            item = dynamodbContactUs.getById(id=id)
+            item = self.dynamodbContactUs.getById(id=id)
             data = json.loads(item.to_json())
             return Response(status=status.HTTP_200_OK, data={"item":data})
         except Exception as e:
-            print("err :", e)
+            logger.error(e)
             return Response({'error': "item doesn't exist"}, status= status.HTTP_404_NOT_FOUND)
 
     def put(self, request:HttpRequest, id:str):
-        dynamodbContactUs = DynamodbContactUs()
         try:
-            item = dynamodbContactUs.getById(id=id)
-            dynamodbContactUs.updateSelfAttributes(entity=item, data=request.data)
+            item = self.dynamodbContactUs.getById(id=id)
+            self.dynamodbContactUs.updateSelfAttributes(entity=item, data=request.data)
             return Response({'isSuccessful' : 'true'}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
-            print("err :", e)
+            logger.error(e)
             return Response({'error': 'Failed to update'}, status= status.HTTP_400_BAD_REQUEST)
 
 
     def delete(self, request:HttpRequest, id : str):
-        dynamodbContactUs = DynamodbContactUs()
         try:
-            dynamodbContactUs.delete(id=id)
+            self.dynamodbContactUs.delete(id=id)
             return Response(status=status.HTTP_202_ACCEPTED)
         except Exception as e:
-            print("err :", e)
+            logger.error(e)
             return Response({'error': 'Failed to delete'}, status= status.HTTP_400_BAD_REQUEST)
         

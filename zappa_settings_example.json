@@ -1,0 +1,32 @@
+{
+    "production": {
+        "aws_region": "ap-south-1",
+        "django_settings": "junkie_django_api.settings",
+        "profile_name": "default",
+        "project_name": "backend",
+        "runtime": "python3.7",
+        "s3_bucket": "your-s3-bucket",
+        "timeout_seconds": 900,
+        "manage_roles": false,
+        "role_name": "ZappaDjangoRole",
+        "role_arn": "arn:aws:iam::????:role/customRole",
+        "environment_variables": {
+            "ENV": "prod"
+        }
+    },
+    "dev": {
+        "aws_region": "your_choice",
+        "django_settings": "junkie_django_api.settings",
+        "profile_name": "default",
+        "project_name": "django-dynamodb",
+        "runtime": "python3.7",
+        "s3_bucket": "custom_bucket",
+        "manage_roles": false,
+        "role_name": "customRole",
+        "role_arn": "arn:aws:iam::???:role/customRole",
+        "debug": true,
+        "environment_variables": {
+            "ENV": "dev"
+        }
+    }
+}

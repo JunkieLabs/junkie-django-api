@@ -1,17 +1,17 @@
 import json
+import logging
 
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from rest_framework.views import APIView
 
 from rest_framework.response import Response
 from rest_framework import status
-# import urllib
 from ..productionLine.dynamodb_interface import DynamodbProductionLine
 from ..product.dynamodb_interface import DynamodbProducts
 
-# Create your views here.
-#_stages = ('proposed', 'ongoing', 'completed')
 
+#_stages = ('proposed', 'ongoing', 'completed')
+logger = logging.getLogger(__name__)
 
 
 class ProductionLineMoveView(APIView):
@@ -19,15 +19,13 @@ class ProductionLineMoveView(APIView):
     dynamodbProducts = DynamodbProducts()
 
     def post(self, request:HttpRequest, id : str ):
-        dynamodbProductionLine = DynamodbProductionLine()
-        dynamodbProducts = DynamodbProducts()
 
         try:
-            productionItem = dynamodbProductionLine.getById(id=id)
+            productionItem = self.dynamodbProductionLine.getById(id=id)
 # PROPOSED
             if productionItem.stage == 'proposed':
                 data = {"stage" : "ongoing"}
-                dynamodbProductionLine.updateSelfAttributes(entity=productionItem, data=data)
+                self.dynamodbProductionLine.updateSelfAttributes(entity=productionItem, data=data)
                 #productionItem.update(actions=[ProductionLine.stage.set('ongoing')])
                 return Response({'isSuccessful': 'true'}, status= status.HTTP_202_ACCEPTED)
 # ONGOING
@@ -39,19 +37,19 @@ class ProductionLineMoveView(APIView):
                     data["detail"] = productionItem.detail
                     data["name"] = productionItem.name
                     data["id"] = productionItem.id
-                    key = dynamodbProducts.create(data=data, keepID=True)
-                    #print(key)
-                    dynamodbProductionLine.updateSelfAttributes(entity=productionItem, data={"stage" : 'completed'})
+                    key = self.dynamodbProducts.create(data=data, keepID=True)
+                    #logger.debug(key)
+                    self.dynamodbProductionLine.updateSelfAttributes(entity=productionItem, data={"stage" : 'completed'})
 
                     return Response(status= status.HTTP_202_ACCEPTED, data= {'isSuccessful': 'true', "keys" : key})
                 except Exception as e:
-                    print(e)
+                    logger.error(e)
                     return Response({'isSuccessful' : 'false'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
     # COMPLETED        
             elif productionItem.stage == 'completed':
                     #productItem = Products.get(hash_key=productionItem.category, range_key=productionItem.id)
-                if dynamodbProducts.checkPkExists(category=productionItem.category, id=productionItem.id):
+                if self.dynamodbProducts.checkPkExists(category=productionItem.category, id=productionItem.id):
                     return Response({'isSuccessful': 'false'}, status= status.HTTP_302_FOUND)
                 else:
                     try:
@@ -61,11 +59,11 @@ class ProductionLineMoveView(APIView):
                         data["detail"] = productionItem.detail
                         data["name"] = productionItem.name
                         data["id"] = productionItem.id
-                        key = dynamodbProducts.create(data=data, keepID=True)
-                        #print("daal diya")
+                        key = self.dynamodbProducts.create(data=data, keepID=True)
+                        #logger.debug("daal diya")
                         return Response({'isSuccessful' : 'true', 'keys' : key}, status = status.HTTP_202_ACCEPTED)
                     except Exception as e:
-                        print(e)
+                        logger.error(e)
                         return Response({'isSuccessful' : 'false'}, status=status.HTTP_304_NOT_MODIFIED)
 
                 # todo - check presence in products table. if not give message and then copy
@@ -73,27 +71,26 @@ class ProductionLineMoveView(APIView):
                 return Response({'isSuccessful': 'false'}, status= status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            print(e)
+            logger.exception(e)
             return Response({'isSuccessful': 'false'}, status= status.HTTP_404_NOT_FOUND)
 
 
 class ProductionLinesView(APIView):
+    dynamodbProductionLine = DynamodbProductionLine()
 
     def post(self, request : HttpRequest):
-        dynamodbProductionLine = DynamodbProductionLine()
 
         data = request.data
         try:
-            key = dynamodbProductionLine.create(data=data)
-            # print(key)
+            key = self.dynamodbProductionLine.create(data=data)
+            # logger.debug(key)
             return Response(status=status.HTTP_201_CREATED, data={"keys" : key, "id" : key["id"]})
         except Exception as e:
-            print("err :", e)
+            logger.exception(e)
             return Response({'error': 'Failed to insert'}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     def get(self, request : HttpRequest):
-        dynamodbProductionLine = DynamodbProductionLine()
         
         lastKey = request.query_params.get('lastKey')
         if lastKey:
@@ -106,7 +103,7 @@ class ProductionLinesView(APIView):
 
 # refine filter usage
         filter = request.query_params.get('filter')
-        # print("filter", filter)
+        # logger.debug("filter", filter)
         if filter != None:
             filter = json.loads(filter)
             if "stage" in filter.keys():
@@ -114,16 +111,16 @@ class ProductionLinesView(APIView):
 
         try:
             if stage == "all":
-                products = dynamodbProductionLine.getPaginationByScan(limit=limit, lastKey=lastKey)
+                products = self.dynamodbProductionLine.getPaginationByScan(limit=limit, lastKey=lastKey)
             else:
-                products = dynamodbProductionLine.getPaginationByStageQuery(limit=limit, lastKey=lastKey, stage=stage)
+                products = self.dynamodbProductionLine.getPaginationByStageQuery(limit=limit, lastKey=lastKey, stage=stage)
 
             l = []
             for item in products:
                 formatItem :dict = json.loads(item.to_json())
                 l.append(formatItem)
         except Exception as e:
-            print(e)
+            logger.error(e)
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -139,14 +136,13 @@ class ProductionLinesView(APIView):
             return Response({'isSuccessful': 'False', "message": "pass array of ids to delete in filter query params with key 'id"}, status= status.HTTP_400_BAD_REQUEST)
         
         ids = filter.get("id", None)
-        dynamodbProductionLine = DynamodbProductionLine()
         if ids != None:
             try:
                 for id in ids:
-                    dynamodbProductionLine.delete(id)
+                    self.dynamodbProductionLine.delete(id)
                 return Response(status=status.HTTP_200_OK, data=ids)
             except Exception as e:
-                print("err :", e)
+                logger.exception(e)
                 return Response({'isSuccessful': 'False', "ids" : ids}, status= status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'isSuccessful': 'False', "message": "pass array of ids to delete in filter query params with key 'id"}, status= status.HTTP_400_BAD_REQUEST)
@@ -155,36 +151,34 @@ class ProductionLinesView(APIView):
 
 
 class ProductionLineDetailView(APIView):
+    dynamodbProductionLine = DynamodbProductionLine()
 
     def get(self, request : HttpRequest, id : str):
-        dynamodbProductionLine = DynamodbProductionLine()
         try:
-            item = dynamodbProductionLine.getById(id=id)
+            item = self.dynamodbProductionLine.getById(id=id)
             data = json.loads(item.to_json())
             return Response(status=status.HTTP_200_OK, data={"item":data})
         except Exception as e:
-            print("err :", e)
+            logger.exception(e)
             return Response({'error': "item doesn't exist"}, status= status.HTTP_404_NOT_FOUND)
 
     def put(self, request:HttpRequest, id:str):
-        dynamodbProductionLine = DynamodbProductionLine()
         try:
-            entity = dynamodbProductionLine.getById(id=id)
-            item = dynamodbProductionLine.updateSelfAttributes(entity=entity, data=request.data)
+            entity = self.dynamodbProductionLine.getById(id=id)
+            item = self.dynamodbProductionLine.updateSelfAttributes(entity=entity, data=request.data)
             data = json.loads(item.to_json())
             return Response({'isSuccessful' : 'true', "item" : data}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
-            print("err :", e)
+            logger.exception(e)
             return Response({'error': 'Failed to update'}, status= status.HTTP_400_BAD_REQUEST)
 
 
     def delete(self, request:HttpRequest, id : str):
-        dynamodbProductionLine = DynamodbProductionLine()
         try:
-            dynamodbProductionLine.delete(id=id)
+            self.dynamodbProductionLine.delete(id=id)
             return Response(status=status.HTTP_202_ACCEPTED, data=id)
         except Exception as e:
-            print("err :", e)
+            logger.exception(e)
             return Response({'error': 'Failed to delete'}, status= status.HTTP_400_BAD_REQUEST)
         
 

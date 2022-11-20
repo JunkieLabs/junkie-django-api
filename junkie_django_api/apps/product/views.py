@@ -12,15 +12,12 @@ from ..product.dynamodb_interface import DynamodbProducts
 import logging
 logger = logging.getLogger(__name__)
 
-logger.debug("this is a debug message!")
-logger.info("this is an info message!!")
-logger.error("this is an error message!!")
 
 
 class ProductsView(APIView):
+    dynamodbProducts = DynamodbProducts()
 # POST
     def post(self, request, **kwargs):
-        dynamodbProducts = DynamodbProducts()
         try:
             x : HttpRequest = request
             a = x.data
@@ -33,17 +30,15 @@ class ProductsView(APIView):
             else:
                 z = x.data
 
-            keys = dynamodbProducts.create(data=z)
+            keys = self.dynamodbProducts.create(data=z)
             context = {"isSuccessfull" : "true", "keys" : keys, "id":keys["id"]}
             return Response(status=status.HTTP_201_CREATED, data=context)
         except Exception as e:
-            # print("err :", e,':::::::::::::::::::::::')
+            logger.exception(e)
             return Response({'error': 'Failed to insert'}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     def get(self, request, **kwargs):
-        dynamodbProducts = DynamodbProducts()
-
         category : str = kwargs.get('category', 'app')
 
         filter = request.query_params.get('filter')
@@ -56,21 +51,20 @@ class ProductsView(APIView):
             category : str = request.query_params.get('category')
 
         lastKey : str = request.query_params.get('lastKey')
-        # print(category)
+        # logger.info(category)
 
         if lastKey:
             lastKey = lastKey.replace("\'", "\"")
             de = json.loads(lastKey)
             lastKey = de
         
-
         totalItemCount : int = request.query_params.get('totalItemCount', 0)
         limit : int = request.query_params.get('limit', 9)
         try:
             if category == 'all':
-                productItter = dynamodbProducts.getPaginationByScan(limit=int(limit), lastKey=lastKey)
+                productItter = self.dynamodbProducts.getPaginationByScan(limit=int(limit), lastKey=lastKey)
             else:
-                productItter = dynamodbProducts.getPaginationByQuery(category=category, limit=int(limit), lastKey=lastKey)
+                productItter = self.dynamodbProducts.getPaginationByQuery(category=category, limit=int(limit), lastKey=lastKey)
             l = []
             for item in productItter:
                 formatItem :dict = json.loads(item.to_json())
@@ -84,7 +78,7 @@ class ProductsView(APIView):
             return Response(status=status.HTTP_200_OK, headers={"Content-Range" : contentRange}, data=context)
 
         except Exception as e:
-            print(e)
+            logger.exception(e)
             return Response({"error" : "failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # DELETE Many
@@ -96,15 +90,14 @@ class ProductsView(APIView):
             return Response({'isSuccessful': 'False', "message": "pass array of ids to delete in filter query params with key 'id"}, status= status.HTTP_400_BAD_REQUEST)
 
         ids : list[str] = filter.get("id", None)
-        dynamodbProducts = DynamodbProducts()
         if ids != None:
             try:
                 for id in ids:
                     _id = id.split("_")
-                    dynamodbProducts.delete(category=_id[0], id=id)
+                    self.dynamodbProducts.delete(category=_id[0], id=id)
                 return Response(status=status.HTTP_200_OK, data=ids)
             except Exception as e:
-                print("err :", e)
+                logger.exception(e)
                 return Response({'isSuccessful': 'False', "ids":ids}, status= status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'isSuccessful': 'False', "message": "pass array of ids to delete in filter query params with key 'id"}, status= status.HTTP_400_BAD_REQUEST)
@@ -112,36 +105,34 @@ class ProductsView(APIView):
 
 
 class ProductDetailView(APIView):
+    dynamodbProducts = DynamodbProducts()
 # GET
     def get(self, request, id:str):
-        # print(category)
         category = id.split("_")[0]
-        dynamodbProducts = DynamodbProducts()
         try:
-            item = dynamodbProducts.getByPK(category=category, id=id)
+            item = self.dynamodbProducts.getByPK(category=category, id=id)
             # item = dynamodbProducts.getById(id=id)
             data = json.loads(item.to_json())
             context = {'item' : data}
             return Response(status=status.HTTP_200_OK, data=context)
         except Exception as e:
-            print("err :", e)
+            logger.exception(e)
             return Response({'error': "item doesn't exist"}, status= status.HTTP_204_NO_CONTENT)
 
 # PUT    
     def put(self, request, id:str):
         category = id.split("_")[0]
 
-        dynamodbProducts = DynamodbProducts()
         try:
-            entity = dynamodbProducts.getByPK(category=category, id=id)
+            entity = self.dynamodbProducts.getByPK(category=category, id=id)
             request.data.pop("id")
             request.data.pop("category")
 
-            entity = dynamodbProducts.updateSelfAttributes(entity=entity, data=request.data)
+            entity = self.dynamodbProducts.updateSelfAttributes(entity=entity, data=request.data)
             item = json.loads(entity.to_json()) 
             return Response({'isSuccessful' : 'true', "item":item}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
-            print("err :", e)
+            logger.exception(e)
             return Response({'isSuccessful' : 'false'}, status= status.HTTP_400_BAD_REQUEST)
 
 # DELETE                        
@@ -153,6 +144,6 @@ class ProductDetailView(APIView):
             dynamodbProducts.delete(category=category, id=id)
             return Response({'isSuccessful' : 'true'}, status=status.HTTP_202_ACCEPTED)
         except Exception as e:
-            print("err :", e)
+            logger.exception(e)
             return Response({'isSuccessful' : 'false', "msg" : e.args}, status= status.HTTP_400_BAD_REQUEST)
 

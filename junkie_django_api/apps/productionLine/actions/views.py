@@ -1,6 +1,7 @@
 #import json
 #from django.shortcuts import render
 #from django.http import HttpResponse
+import logging
 from rest_framework import status
 #from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -10,6 +11,8 @@ from ...productionLine.actions.dynamodb_interface import DynamodbProductionLineA
 from ...productionLine.dynamodb_interface import DynamodbProductionLine
 
 from .models import ProductionLineAction
+
+logger = logging.getLogger(__name__)
 
 
 def parseVal(str):
@@ -30,6 +33,8 @@ def parseVal(str):
 
 # Create your views here.
 class ProductionLineActionView(APIView):
+    dynamodbProductionLine = DynamodbProductionLine()
+    dynamodbProductionAction = DynamodbProductionLineAction()
 
     def post(self, request, pId):
         actionType : str = request.data['actionType']
@@ -38,22 +43,20 @@ class ProductionLineActionView(APIView):
         newVal = parseVal(request.data.get('actionValue'))
         ipAction = ip + "_" + actionType
 
-        dynamodbProductionLine = DynamodbProductionLine()
-        dynamodbProductionAction = DynamodbProductionLineAction()
 
         try:
-            product = dynamodbProductionLine.getById(id=pId)
+            product = self.dynamodbProductionLine.getById(id=pId)
             x = float(product.wtdPriority)
             n = int(product.priorityCount)
         except Exception as e:
-            print("err :", e)
+            logger.exception(e)
             return Response({"error" : "Product Not Found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         try:
-            entry = dynamodbProductionAction.getByIpAction(pId=pId, ipAction=ipAction)
+            entry = self.dynamodbProductionAction.getByIpAction(pId=pId, ipAction=ipAction)
             entryExist = True
         except Exception as e:
-            print("err :", e)
+            logger.error(e)
             entryExist = False
 
         if entryExist:
@@ -64,8 +67,8 @@ class ProductionLineActionView(APIView):
                 if oldVal != newVal:
                     val = (x*n - oldVal + newVal)/(n+1)
                     data = {"wtdPriority" : val, "priorityCount" : n+1}
-                    dynamodbProductionLine.updateSelfAttributes(entity=product, data=data)
-                    dynamodbProductionAction.updateSelfActionType(entity=entry, actionVal=newVal)
+                    self.dynamodbProductionLine.updateSelfAttributes(entity=product, data=data)
+                    self.dynamodbProductionAction.updateSelfActionType(entity=entry, actionVal=newVal)
                     return Response({"isSuccessful" : "true"}, status=status.HTTP_202_ACCEPTED)
                 else:
                     return Response({"isSuccessful" : "false", "message" : "already given priority"}, status=status.HTTP_208_ALREADY_REPORTED)
@@ -76,12 +79,12 @@ class ProductionLineActionView(APIView):
             newEntry.pId = pId
             newEntry.ipAction = ipAction
             newEntry.actionVal = actionValue
-            dynamodbProductionAction.add(entity=newEntry)
+            self.dynamodbProductionAction.add(entity=newEntry)
             if actionType == 'vote':
                 voteCount = product.voteCount + 1
-                dynamodbProductionLine.updateSelfAttributes(entity=product, data={"voteCount" : voteCount})
+                self.dynamodbProductionLine.updateSelfAttributes(entity=product, data={"voteCount" : voteCount})
             elif actionType == 'priority':
                 val = (x * n + newVal)/(n+1)
                 data = {"wtdPriority" : val, "priorityCount" : n+1}
-                dynamodbProductionLine.updateSelfAttributes(entity=product, data=data)
+                self.dynamodbProductionLine.updateSelfAttributes(entity=product, data=data)
             return Response({"issuccessful" : "true"}, status=status.HTTP_202_ACCEPTED)

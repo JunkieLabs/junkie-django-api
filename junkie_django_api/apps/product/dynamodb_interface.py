@@ -1,22 +1,22 @@
 import json
+import logging
 
 from nanoid import generate
 from junkie_django_api.settings import NANO_ID as _A
 from ..product.models import Products
 from pynamodb.expressions.operand import Path
 
-#_A = '0123456789qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
-
+logger = logging.getLogger(__name__)
 
 class DynamodbProducts:
     def __init__(self) -> None:
         if not Products.exists():
             Products.create_table(wait=True)
-            print("created the products-table")
+            logger.info("created the products-table")
         # pass
     # if not Products.exists():
     #     Products.create_table(wait=True)
-    #     print("created the products-table")
+    #     logger.info("created the products-table")
 
 
     def create(self, data : dict, keepID : bool=False):
@@ -53,17 +53,17 @@ class DynamodbProducts:
 
     def getPaginationByQuery(self, limit : int, lastKey : str, category : str):
         productItter = Products.query(hash_key=category, filter_condition=None, limit=int(limit), last_evaluated_key=lastKey)#filter_condition= Products.status == 'unrestricted'
-        # print("size",productItter.__sizeof__())
+        #logger.info("size",productItter.__sizeof__())
         return productItter
 
     def getPaginationByScan(self, limit : int, lastKey : dict):
         productList = Products.scan(filter_condition=None, limit=int(limit), last_evaluated_key=lastKey)#filter_condition= Products.status == 'unrestricted'
-        # print("size",productList.__sizeof__())
+        #logger.info("size",productList.__sizeof__())
         return productList
 
     def updateSelfAttributes(self, entity : Products, data : dict):
         actions = []
-        # print("data :", data)
+        #logger.info("data :", data)
         keys = entity.attribute_values.keys()
         for key in data.keys():
             if (key != "id") or (key != "category"):
@@ -76,5 +76,5 @@ class DynamodbProducts:
         try:
             return Products.get(hash_key=category, range_key=id).exists()
         except Exception as e:
-            # print("err :", e)
+            logger.exception(e)
             return False
