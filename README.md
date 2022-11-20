@@ -3,7 +3,7 @@ A REST API developed using Django Rest Framework, which uses AWS Dynamodb as its
 We use pynamodb, for its ORM, to write models and interface to Dynamodb database.
 
 
-![GitHub](https://img.shields.io/github/license/RahulPrakash11/Django-DynamoDb-Lambda-function)
+![GitHub](https://img.shields.io/github/license/JunkieLabs/junkie-django-api)
 ![](https://img.shields.io/badge/Python-3.7-red)
 ![](https://img.shields.io/badge/Django-3.2-green)
 ![](https://img.shields.io/badge/Database-Dynamodb-orange)
@@ -198,7 +198,7 @@ For any questions or suggestions send a mail to junkielabs.dev@gmail.com or chat
 
 <br>
 
-<!-- [![Gitter](https://badges.gitter.im/nubar-api/django-dynamodb-lambda-function.svg)](https://gitter.im/nubar-api/django-dynamodb-lambda-function?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) -->
+[![Gitter](https://badges.gitter.im/nubar-api/Junkie-Django-Api.svg)](https://gitter.im/nubar-api/Junkie-Django-Api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 <br>
 
